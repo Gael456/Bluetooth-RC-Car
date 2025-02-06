@@ -109,3 +109,39 @@ void PWM0_0_Update_Duty_Cycle(uint16_t duty_cycle)
 	// the PWM signal will be driven high
 	PWM0->_0_CMPA = duty_cycle;
 }
+
+
+void Motor_Forward(uint16_t speed)
+{
+    // For Motor A (PWM generator 0): Forward direction (AIN1 active, AIN2 off)
+    PWM0->_0_CMPA = speed;  // Set forward PWM duty cycle on PB6 (M0PWM0)
+    PWM0->_0_CMPB = 0;      // Ensure reverse channel on PB7 (M0PWM1) is off
+
+    // For Motor B (PWM generator 1): Forward direction (BIN1 active, BIN2 off)
+    PWM0->_1_CMPA = speed;  // Set forward PWM duty cycle on PB4 (M0PWM2)
+    PWM0->_1_CMPB = 0;      // Ensure reverse channel on PB5 (M0PWM3) is off
+}
+
+// High-level function to drive both motors in reverse
+void Motor_Reverse(uint16_t speed)
+{
+    // For Motor A (PWM generator 0): Reverse direction (AIN2 active, AIN1 off)
+    PWM0->_0_CMPA = 0;      // Turn off forward channel on PB6 (M0PWM0)
+    PWM0->_0_CMPB = speed;  // Set reverse PWM duty cycle on PB7 (M0PWM1)
+
+    // For Motor B (PWM generator 1): Reverse direction (BIN2 active, BIN1 off)
+    PWM0->_1_CMPA = 0;      // Turn off forward channel on PB4 (M0PWM2)
+    PWM0->_1_CMPB = speed;  // Set reverse PWM duty cycle on PB5 (M0PWM3)
+}
+
+// High-level function to stop both motors
+void Motor_Stop(void)
+{
+    // For Motor A (PWM generator 0)
+    PWM0->_0_CMPA = 0;
+    PWM0->_0_CMPB = 0;
+    
+    // For Motor B (PWM generator 1)
+    PWM0->_1_CMPA = 0;
+    PWM0->_1_CMPB = 0;
+}

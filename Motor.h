@@ -35,3 +35,9 @@ void Motor_Init(uint16_t period_constant, uint16_t duty_cycle);
  * @return None
  */
 void PWM0_0_Update_Duty_Cycle(uint16_t duty_cycle);
+
+void Motor_Forward(uint16_t speed);
+
+void Motor_Reverse(uint16_t speed);
+
+void Motor_Stop(void);
