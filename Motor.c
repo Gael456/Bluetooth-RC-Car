@@ -1,5 +1,5 @@
 /**
- * @file Stepper_Motor.c
+ * @file Motor.c
  *
  * @brief Source file for the Stepper_Motor driver.
  *
@@ -8,8 +8,7 @@
  * 
  * The following components are used:
  *	-	3.3V - 6V TT Motor
- *  - ULN2003 Stepper Motor Driver
- *  - 3.3V / 5V Breadboard Power Supply Module (External Power Source)
+ *  - ULN2003 Motor Driver
  *
  * @author Gael Esparza Lobatos
  */

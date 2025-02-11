@@ -1,5 +1,17 @@
+/**
+ * @file main.c
+ *
+ * @brief 
+ *
+ 
+ *
+ * @author Gael Esparza Lobatos
+ */
+
+
+
 #include "Motor.h"
-#include "Timer_Interrupt.h"   // Contains Timer_0A_Interrupt_Init() and TIMER0A_Handler()
+#include "Timer_Interrupt.h"   
 #include "TM4C123GH6PM.h"
 
 volatile uint32_t g_msTicks = 0;
@@ -26,6 +38,7 @@ int main(void)
     // Initialize Timer 0A to generate an interrupt every 1ms.
     // The Timer0ATask function will increment g_msTicks.
     Timer_0A_Interrupt_Init(Timer0ATask);
+		Motor_Init(g_msTicks);
     
     // Initialize the motor driver.
     // Example: period_constant = 16000 (for a specific PWM frequency), duty_cycle = 8000 (50% duty cycle)
