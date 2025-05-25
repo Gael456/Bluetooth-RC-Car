@@ -1,62 +1,73 @@
 /**
  * @file main.c
  *
- * @brief 
- *
- 
+ * @brief Test program for Motor A (PWM generator 0 on PB6/PB7) using
+ *        Timer0A interrupts for a millisecond tick.
  *
  * @author Gael Esparza Lobatos
  */
 
-
-
-#include "Motor.h"
-#include "Timer_Interrupt.h"   
 #include "TM4C123GH6PM.h"
+#include "Motor.h"
+#include "Timer_Interrupt.h"
 
-volatile uint32_t g_msTicks = 0;
+#define SYSTEM_CLOCK 50000000U  // 50 MHz system clock
 
-// User-defined task to be called every 1ms by Timer0A interrupt
-void Timer0ATask(void)
-{
+// millisecond tick counter (incremented in the Timer0A ISR)
+static volatile uint32_t g_msTicks = 0;
+
+/**
+ * @brief User callback for Timer0A interrupts (1 ms period).
+ */
+static void Timer0ATask(void) {
     g_msTicks++;
 }
 
-// Simple delay function using the g_msTicks counter
-void delay_ms(uint32_t ms)
-{
+/**
+ * @brief Delay for the given number of milliseconds using the 1 ms tick.
+ */
+static void delay_ms(uint32_t ms) {
     uint32_t start = g_msTicks;
-    while ((g_msTicks - start) < ms)
-    {
-        // Busy-wait loop; consider low-power sleep in a real application.
+    while ((g_msTicks - start) < ms) {
+        // simply wait
     }
 }
 
-int main(void)
-{
-    
-    // Initialize Timer 0A to generate an interrupt every 1ms.
-    // The Timer0ATask function will increment g_msTicks.
+// Motor A control (PWM generator 0: PB6 = forward / PB7 = reverse)
+static void Motor_A_Forward(uint16_t speed) {
+    PWM0->_0_CMPA = speed;  // PB6 high-side PWM
+    PWM0->_0_CMPB = 0;      // PB7 off
+}
+static void Motor_A_Reverse(uint16_t speed) {
+    PWM0->_0_CMPA = 0;      // PB6 off
+    PWM0->_0_CMPB = speed;  // PB7 high-side PWM
+}
+static void Motor_A_Stop(void) {
+    PWM0->_0_CMPA = 0;
+    PWM0->_0_CMPB = 0;
+}
+
+int main(void) {
+    // 1) Set up a 1 ms tick via Timer0A
     Timer_0A_Interrupt_Init(Timer0ATask);
-		Motor_Init(g_msTicks);
-    
-    // Initialize the motor driver.
-    // Example: period_constant = 16000 (for a specific PWM frequency), duty_cycle = 8000 (50% duty cycle)
+
+    // 2) Initialize the motor PWM driver (PB4–PB7)
+    //    period = 16000 ? ~1 kHz (assuming 50 MHz/16 divider).
+    //    initial duty = 8000 (50%) — will be overridden by our test calls.
     Motor_Init(16000, 8000);
-    
-    // Main test loop: cycle through motor commands.
-    while (1)
-    {
-        // Command the motors to run forward at 50% speed
-        Motor_Forward(8000);
-        delay_ms(1000);  // Run forward for 1 second
-        
-        // Command the motors to run in reverse at 50% speed
-        Motor_Reverse(8000);
-        delay_ms(1000);  // Run reverse for 1 second
-        
-        // Stop the motors
-        Motor_Stop();
-        delay_ms(1000);  // Remain stopped for 1 second
+
+    // 3) Main test loop for Motor A
+    while (1) {
+        Motor_A_Forward(8000);  // 50% forward
+        delay_ms(1000);
+
+        Motor_A_Reverse(8000);  // 50% reverse
+        delay_ms(1000);
+
+        Motor_A_Stop();
+        delay_ms(1000);
     }
+
+    // never reached
+    return 0;
 }
